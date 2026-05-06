@@ -825,9 +825,10 @@ ggplot(plot_data,
   ) +
   labs(
     x = "Forested Area (%)",
-    y = "Threatened Species Count (log scale)",
+    y = "",
     color = "Leading Plastic",
-    title = "Figure 3: Where Do Different Plastic Types Dominate?"
+    title = "Figure 3: Where Do Different Plastic Types Dominate?",
+    subtitle = "Forested Area vs. Threatened Species Count (log scale)"
   ) +
   theme_minimal() +
   theme(plot.title = element_text(face = "bold", size = 14))
@@ -868,10 +869,10 @@ population_plastics |>
   scale_x_log10(labels = scales::label_comma()) +
   scale_fill_manual(values = c("#3498DB", "#F39C12", "#18BC9C")) +
   labs(
-    title = "Figure 4: How Threatened Species Counts Differ Across the Top 3 Plastic Types",
+    title = "Figure 4: Threatened Species Counts Across Top 3 Plastic Types",
     subtitle = "Each country is weighted by how much of that plastic it collected",
     x = "Threatened Species Count (log scale)",
-    y = "Plastic Type"
+    y = ""
   ) +
   theme_minimal() +
   theme(
