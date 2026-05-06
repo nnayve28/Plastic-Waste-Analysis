@@ -1,5 +1,6 @@
 ---
-title: "Visualizing Plastics: Deliverable from Data"
+title: "Visualizing Plastics"
+subtitle: "Waste Composition and Environmental Cost"
 author: "Nathan Lee, Noah Nayve, Ryan Ekdahl, Taiga Sobajima"
 format:
   html:
@@ -9,43 +10,13 @@ format:
 editor: source
 ---
 
-# Data Context
+Plastic waste is an issue that we face in our day to day lives. While this problem of littered bottles, broken containers, and loose bags affect our cities, it ultimately takes its toll on the environment and wildlife. Our goal is to identify international trends or patterns in environmental stewardship in order to better understand how we can collectively address this issue.
 
 ### Plastic (Main Data Set)
 
 The main data set comes from Sarah Sauve, who conducted an audit based on Break Free from Plastic (BFFP), a global organization that runs annual brand audits. In these audits, volunteers around the world collect and report plastic waste. This makes the data set observational, as it relies on self-reported data submitted by volunteers each year, specifically for 2019 and 2020 in this case. However, the exact methods used by each volunteer are unknown. Each observation represents the plastic collected from a specific parent company within a given country and year. Here, Sauve intends to utilize this data set to raise plastic pollution awareness and highlight its importance. We are further supporting Sauve with our own analysis on two research questions presented later in this deliverable.
 
-Below is a breakdown of all the variables in this data set:
-
-- **country** (character): country of cleanup
-
-- **year** (double): year, either 2019 or 2020
-
-- **parent_company** (character): source of plastic
-
-- **empty** (double): plastics counted without a brand being recorded
-
-- **hdpe** (double): high density polyethylene count (i.e. plastic milk containers, plastic bags, bottle caps, trash cans, oil cans, plastic lumber, toolboxes, supplement containers)
-
-- **ldpe** (double): low density polyethylene count (i.e. plastic bags, Ziploc bags, buckets, squeeze bottles, plastic tubes, chopping boards)
-
-- **o** (double): other counts
-
-- **pet** (double): polyester plastic count (i.e. polyester fibers, soft drink bottles, food containers)
-
-- **pp** (double): polypropylene count (i.e. flower pots, bumpers, car interior trim, industrial fibers, carry-out beverage cups, microwavable food containers, DVD keep cases)
-
-- **ps** (double): polystyrene count (i.e. toys, video cassettes, ashtrays, trunks, beverage/food coolers, beer cups, wine and champagne cups, carry-out food containers, Styrofoam)
-
-- **pvc** (double): PVC plastic count (window frames, bottles for chemicals, flooring, plumbing pipes)
-
-- **grand_total** (double): grand total count (all types of plastic)
-
-- **num_events** (double): number of counting events
-
-- **volunteers** (double): number of volunteers
-
-Before combining two CSV files, the 2019 and 2020 data, some data cleaning steps were implemented. The 2019 CSV had two columns for "pp" (Polypropylene) and "ps" (Polystyrene) counts, so the repeated columns were combined to make one overall column for each variable. The data type of the "grand_total" column from the 2020 CSV was changed from character to numeric. Lastly, some variables were renamed to match one another, ensuring no errors when combining the two CSV files.
+In this data set, we focused on the country name, parent company which is the source of plastic, grand total count of all plastics, and number of volunteers. We ended up looking at all plastic type variables in this data set: high and low density polyethylene, polyester, polypropylene, polystyrene, PVC plastic, and other plastic types.
 
 However, this data set has important limitations and potential inconsistencies to consider. The data depends on where volunteers are located, meaning it is more likely to be collected in accessible areas, which can lead to over- or under- representation in some regions and introduce bias. Due to the nature of self-reported data, there is no way for us to verify the data. There may also be variability in how the plastic data is classified and reported to BFFP despite clear definitions.
 
@@ -53,43 +24,15 @@ However, this data set has important limitations and potential inconsistencies t
 
 The supplementary data set comes from API Ninjas, a software company that publishes real-world data into formatted APIs. The Country API aggregates geographic, demographic, and economic metrics for every country in the world which can be found at: <https://api-ninjas.com/api/country>. Each observation represents a single country, where each row contains nation level statistics for that country. For example, a single row might represent the United States, containing values such as a population of approximately 331 million, a GDP of roughly \$23 trillion, and an unemployment rate around 5%. We are utilizing this API to join demographic and economic context to the primary plastics data set, supporting our research questions on how volunteer participation and plastic collection patterns vary across countries of different sizes and development levels.
 
-The data were accessed from our code using HTTP GET requests to the /v1/country endpoint, with each country returned as a JSON object. Requests were made by country name, iterating over the unique country names in the plastics data set. Each JSON object was then joined to the plastics data set on country name, adding each country's demographic and economic metrics to its corresponding plastic collection observation.
-
-Below is a breakdown of the key variables used from this data set:
-
-- **name** (character): name of the country 
-
-- **population** (integer): total population of the country
-
-- **gdp** (double): gross domestic product in US Dollars 
-
-- **gdp_growth** (double): GDP growth rate in % 
-
-- **unemployment** (double): unemployment rate in % 
-
-- **surface_area** (double): total surface area of the country in km² 
-
-- **urban_pop_rate** (double): percentage of the population living in urban areas 
-
-- **fertility** (double): average number of children born per woman 
-
-- **infant_mortality** (double): number of infant deaths per 1,000 live births 
-
-- **currency** (character): 3-letter currency code of the country 
-
-- **threatened_species** (integer): number of threatened species
-
-- **forested_area** (double): percentage of the country's total land area covered by forest
+Here, we only looked at the country name, the number of threatened species, and percentage of the country's total land covered by forest.
 
 This data set also has important limitations to consider. API Ninjas does not include collection dates or timestamps for individual records, so we are unable to determine how recent each country's data was collected or updated. Additionally, since the exact source for each variable is not listed, it is difficult to determine the reliability of certain metrics collected for each country. There were also discrepancies in how each country name was displayed between API Ninjas and our plastics data, requiring standardization prior to merging.
-
-# Preparing Data
-
-### Loading in Libraries
 
 ```{r}
 #| label: Loading Libraries
 #| message: false
+#| echo: false
+
 library(tidyverse)
 library(glue)
 library(gt)
@@ -102,19 +45,18 @@ library(jsonlite)
 library(ggrepel)
 ```
 
-### Reading Data Sets
-
 ```{r}
 #| label: Reading Plastic Data Set
 #| message: false
+#| echo: false
 
 plastics <- read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2021/2021-01-26/plastics.csv')
 ```
 
-### Using API to retrieve country-level data
-
 ```{r}
 #| eval: false
+#| echo: false
+
 # Function used to get data from the API
 my_api_key <- Sys.getenv("API_NINJAS_KEY")
 
@@ -130,6 +72,8 @@ get_country_url <- function(country, api_key = my_api_key){
 
 ```{r}
 #| eval: false
+#| echo: false
+
 # Dataset for all countries from plastics taken from API, (3 missing)
 all_countries <- plastics |>
   filter(country != "EMPTY") |>
@@ -148,6 +92,8 @@ all_countries_data <- map(
 
 ```{r}
 #| eval: false
+#| echo: false
+
 # Merged plastics and population API datatset
 population_plastics <- plastics |>
   mutate(country = str_to_title(country)) |>
@@ -156,33 +102,15 @@ population_plastics <- plastics |>
 
 ```{r}
 #| message: false
+#| echo: false
+
 # API data was fetched once and merged dataset was written to CSV to avoid repeated API calls
 population_plastics <- read_csv("data/population_plastics.csv")
 ```
 
-# Research Questions
+### Volunteers and polyethylene
 
-1.  Do countries with more volunteers tend to collect more proportions of both high and low density polyethylene plastic in 2019 and 2020?
-
-2.  Do countries with greater forest coverage and more threatened species show a different breakdown of plastic types?
-
-# Summaries and Visualizations
-
-### Question 1
-
-This custom function "plastic_volunteer_summary" finds volunteer and polyethylene plastic statistics based on an inputted polyethylene plastic type and country name. The default data set input is the main, plastic data set.
-
-Below are the outputs generated by this function. Note, the output statistics assume a given country provided by the input and years 2019 and 2020. The letter in the () will be either "H" or "L", indicating high or low density polyethylene respectively (HDPE or LDPE):
-
-- Ave\_()DPE (double): average polyethylene across parent companies
-
-- Percent\_()DPE (double): percent polyethylene collected over all plastics
-
-- Total\_()DPE (double): total polyethylene collected
-
-- Ave_Vol (double): average number of volunteers
-
-- Total_Vol (double): total number of volunteers
+Polyethylene is one of the most widely used plastic types globally, as it includes bags, bottles, and trash cans. Our interest is on collecting more polyehtylene plastics, both high and low density, to reduce plastic waste from their widespread use. Specifically, we decided to look into if the number of volunteers affects the amount of polyethylene plastic collected.
 
 ```{r}
 #| label: plastic_volunteer_summary function
@@ -587,21 +515,9 @@ plastics |>
 
 To further investigate the relationship identified in Figure 1, Figure 2 compares HDPE and LDPE proportions for the top and bottom 10 countries by total volunteer count. This dumbbell plot contrasts both polyethylene types side by side to better illustrate how plastic composition differs between high and low volunteer countries. Among the top 10 volunteer countries, most show a significant gap between HDPE (blue) and LDPE (orange), with LDPE consistently exceeding HDPE, most prominently in Nigeria and Japan. This aligns with the LDPE findings in Table 5, where higher volunteer countries tended to report more LDPE overall. Conversely, the bottom 10 volunteer countries show both proportions clustered near zero, suggesting that low volunteer participation corresponds with minimal polyethylene collection of either type. Taking these observations together with Figure 1, the results provide some support for a positive association between volunteer count and polyethylene proportion. However, notable outliers such as Taiwan and Bhutan (which had high volunteer counts but zero polyethylene reported) suggest that country specific factors such as laws or regulations around plastic use, as mentioned previously, may contribute to this disparity.
 
-### Question 2
+### Forest Coverage/Threatened Species and Plastic Type Breakdown
 
-This custom function "summarize_plastic_and_ecology" computes the average proportion of each plastic type along with ecological variables for a given country. The default data set input is the joined population plastics data set.
-
-Below are the outputs generated by this function for each country:
-
-- **avg_pet, avg_hdpe, avg_ldpe, avg_pp, avg_ps, avg_pvc, avg_o** (double): average proportion of each plastic type collected
-
-- **avg_forested** (double): average percentage of land covered by forest
-
-- **avg_threatened** (double): average number of threatened species
-
-- **leading_plastic** (character): the plastic type with the highest average proportion
-
-The function is then iterated over all 45 countries with available ecological data using `map()` and combined into a single summary table using `bind_rows()`.
+The findings suggest a positive association between polyethylene collected and volunteers, but as mentioned before, we must consider the differences within each country. This may include certain laws advocating for recycling, GDP, and environment. We focused on environmental differences as wildlife and natural health could be damaged significantly from plastic waste. Variables we consider here are each country's biodiversity profile and number of threatened species.
 
 ```{r}
 # function that computes mean of the following variables for each country: country, pet, hdpe, ldpe, pp, ps, pvc, other, forested_area, and threatened_species
@@ -967,7 +883,10 @@ population_plastics |>
 
 Figure 4 shows the distribution of threatened species counts across the three most commonly collected plastic types: PET, LDPE, and PP, where each country is weighted by how much of that plastic it collected. The PET ridge is centered around 100-500 threatened species, suggesting that PET plastic is predominantly collected in countries with relatively lower biodiversity level. The LDPE ridge shows a similar distribution but is slightly broader, indicating more variability. Lastly, PP ridge is shifted furthest to the right, peaking around 1,000 threatened species, suggesting that PP plastic is more commonly collected in countries with higher biodiversity level. This pattern is consistent with the findings from Table 7 and Figure 3, further supporting the idea that plastic type composition is associated with a country's ecological richness.
 
-# Data Model
+### Explaining Variation in PET Collection Proportion
+
+To build on these observed relationships, we modeled PET collection proportion as a function of ecological, economic, and participation-related factors to quantify how much each contributes to its variability across countries.
+
 ```{r}
 pet_model <- population_plastics |>
   filter(parent_company == "Grand Total",
