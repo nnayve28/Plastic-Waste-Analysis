@@ -33,6 +33,11 @@ library(scales)
 library(ggridges)
 library(broom)
 library(ggrepel)
+library(rvest)
+library(httr)
+library(geodata)
+library(leaflet)
+library(sf)
 ```
 
 ```{r}
@@ -147,7 +152,7 @@ pet_diff <- population_plastics |>
 list(
   icon  = "arrow-down",
   color = "#D3D3D3",
-  value = paste0(round(pet_diff * 100, 1), " pp")
+  value = paste0(round(pet_diff * 100, 1), "%")
 )
 ```
 
@@ -156,7 +161,7 @@ list(
 #| title: "Significant Predictor of PET"
 
 list(
-  icon  = "tree",
+  icon  = "bug",
   color = "#D3D3D3",
   value = "Species"
 )
@@ -168,6 +173,7 @@ list(
 
 #### Low Coverage
 
+::: {.card}
 ```{r}
 #| fig-alt: "Bar chart showing bottom 5 forest coverage countries with plastic waste breakdown"
 #| label: bottom 5 countries bar chart with plastic waste breakdown
@@ -201,9 +207,11 @@ ggplotly(bottom5_forest, tooltip = "text")
 
 Hover over each bar for plastic waste breakdown:  
 PET = polyester, HDPE = high density polyethylene, LDPE = low density polyethylene, PP = polypropylene, PS = polystyrene, PVC, Other
+:::
 
 #### Medium Coverage
 
+::: {.card}
 ```{r}
 #| fig-alt: "Bar chart showing medium 5 forest coverage countries with plastic waste breakdown"
 #| label: medium 5 countries bar chart with plastic waste breakdown
@@ -238,9 +246,11 @@ ggplotly(medium5_forest, tooltip = "text")
 
 Hover over each bar for plastic waste breakdown:  
 PET = polyester, HDPE = high density polyethylene, LDPE = low density polyethylene, PP = polypropylene, PS = polystyrene, PVC, Other
+:::
 
 #### High Coverage
 
+::: {.card}
 ```{r}
 #| fig-alt: "Bar chart showing top 5 forest coverage countries with plastic waste breakdown"
 #| label: top 5 countries bar chart with plastic waste breakdown
@@ -275,12 +285,14 @@ ggplotly(high5_forest, tooltip = "text")
 
 Hover over each bar for plastic waste breakdown:  
 PET = polyester, HDPE = high density polyethylene, LDPE = low density polyethylene, PP = polypropylene, PS = polystyrene, PVC, Other
+:::
 
 ### Visualizations
 
 ::: {.card}
 ```{r}
 #| message: false
+#| label: ridge plot for threatened species
 #| fig-alt: "Ridge plot showing threatened species distribution across top 3 plastic types"
 
 population_plastics |>
@@ -313,3 +325,164 @@ population_plastics |>
 ```
 PP is collected in the most biodiverse countries, while PET dominates in nations with fewer threatened species. LDPE falls in between.
 :::
+
+# India
+
+```{r}
+#| label: getting India data
+
+URL <- "https://www.pib.gov.in/PressReleasePage.aspx?PRID=1943210&reg=3&lang=2"
+
+# used AI here to help get url, basically disguises so we can fetch the data
+page <- GET(URL, user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64)"))
+
+tables_india <- content(page, "text") |>
+  read_html() |>
+  html_table(fill = TRUE)
+
+plastic_raw <- tables_india[[2]]
+
+plastic_india <- plastic_raw |>
+  select(state = 2, waste_2017_18 = 4, waste_2018_19 = 5) |>
+  slice(-1, -2) |>
+  mutate(waste_2017_18 = as.numeric(waste_2017_18),
+         waste_2018_19 = as.numeric(waste_2018_19)) |>
+  mutate(state = recode(state,
+    "Jammu & Kashmir"                          = "Jammu and Kashmir",
+    "Madhya  Pradesh"                          = "Madhya Pradesh",
+    "Andaman and Nicobar Islands"              = "Andaman & Nicobar",
+    "Dadra and Nagar Haveli and Daman and Diu" = "Dadra and Nagar Haveli",
+    "Delhi NCR"                                = "NCT of Delhi"
+  ))
+
+if (!file.exists("data/india_gadm.rds")) {
+  india_GADM <- gadm("IND", level = 1, path = "data/") |> st_as_sf()
+  saveRDS(india_GADM, "data/india_gadm.rds")
+} else {
+  india_GADM <- readRDS("data/india_gadm.rds")
+}
+
+india_df <- india_GADM |>
+  left_join(plastic_india, by = c("NAME_1" = "state"))
+```
+
+## Row 1 {height="30%"}
+
+```{r}
+#| content: valuebox
+#| label: India is country chosen
+#| title: "Country Chosen"
+
+list(
+  icon = "geo-fill",
+  color = "#D3D3D3",
+  value = "India"
+)
+```
+
+```{r}
+#| content: valuebox
+#| label: number of India threatened species
+#| title: "Threatened Species Count"
+
+list(
+  icon = "exclamation-triangle",
+  color = "#D3D3D3",
+  value = "1,118"
+)
+```
+
+```{r}
+#| content: valuebox
+#| label: India forested area
+#| title: "Average Forested Area"
+
+india_forest <- plastic_ecology_summary_table |>
+  filter(country == "India") |>
+  pull(avg_forested)
+
+list(
+  icon = "tree",
+  color = "#D3D3D3",
+  value = paste0(india_forest, "%")
+)
+```
+
+## Row 2 (height="70%")
+
+### Column 1
+
+::: {.card}
+India has a high forested area and threatened species count. Also, they have the most complete and distributed plastic profile in the data.
+
+```{r}
+#| label: bar chart for India plastic breakdown
+#| fig-height: 7
+#| fig-width: 15
+
+just_india <- plastic_ecology_summary_table |>
+  filter(country == "India") |>
+  select(-country, -avg_forested, -avg_threatened, -leading_plastic) |>
+  pivot_longer(cols = everything(),
+               names_to = "plastic_type",
+               values_to = "proportion") |>
+  mutate(plastic_type = str_remove(plastic_type, "avg_") |> str_to_upper()) |>
+  mutate(plastic_type = case_when(plastic_type == "O" ~ "Other",
+                                  TRUE ~ plastic_type))
+
+india_colors <- c("PVC"  = "#880e4f",
+                  "PS" = "#ad1457",
+                  "PP" = "#c2185b",
+                  "PET"   = "#e91e63",
+                  "Other"   = "#f48fb1",
+                  "LDPE" = "#ffb3c6",
+                  "HDPE"  = "#fce4ec"
+                  )
+
+ggplot(just_india, aes(x = proportion,
+                          y = plastic_type,
+                          fill = plastic_type)) +
+  geom_col() +
+  geom_text(aes(label = paste0(round(proportion * 100, 1), "%")),
+            hjust = -0.2,
+            size  = 4) +
+  scale_fill_manual(values = india_colors) +
+  labs(title = "Plastic Type Distribution — India",
+       x     = "Proportion",
+       y     = ""
+       ) +
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.text.y = element_text(size = 18),
+        axis.text.x = element_text(size = 15),
+        axis.title.x = element_text(size = 18),
+        plot.title = element_text(size = 25, face = "bold"))
+```
+:::
+
+### Column 2
+
+```{r}
+#| label: map with states and territories
+
+pal <- colorNumeric("RdPu", domain = india_df$waste_2018_19, na.color = "#cccccc")
+
+leaflet(india_df) |>
+  addProviderTiles(providers$CartoDB.Positron) |>
+  setView(lng = 90, lat = 22, zoom = 3.5) |>
+  addPolygons(fillColor = ~pal(waste_2018_19),
+              fillOpacity = 0.8,
+              color = "black",
+              weight = 1.5,
+              label = ~paste0(NAME_1, ": ",
+                              ifelse(is.na(waste_2018_19), "No data",
+                                     paste(formatC(waste_2018_19, format="f", digits=0, big.mark=","),
+                                           "tonnes"))),
+              highlightOptions = highlightOptions(weight = 2, fillOpacity = 0.9)
+              ) |>
+  addLegend(pal = pal,
+            values = ~waste_2018_19,
+            title    = "Plastic waste (tonnes, 2018-19)",
+            position = "bottomright",
+            na.label = "No data")
+```
