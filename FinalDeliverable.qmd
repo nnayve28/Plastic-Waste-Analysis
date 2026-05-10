@@ -222,7 +222,7 @@ summarize_plastic_volunteer("hdpe", "United States of America") |>
   )
 ```
 
-Table 1 shows HDPE and volunteer statistics for the United States. The USA averaged 625.5 volunteers across 2019 and 2020, with only 9.21% of plastic collected being HDPE, and a mean of 0.7 HDPE pieces per parent company. To see whether this proportion is low compared to other polyethylene types, we next looked at its LDPE.
+Table 1 shows HDPE and volunteer statistics for the United States. The USA averaged 625.5 volunteers across 2019 and 2020, with only 9.21% of plastic collected being HDPE, and a mean of 0.7 HDPE pieces per parent company. To see whether this proportion was low compared to other polyethylene types, we next looked at its LDPE.
 
 ```{r}
 #| label: ldpe for USA
@@ -531,7 +531,7 @@ plastics |>
   theme_minimal()
 ```
 
-Figure 2 compares HDPE and LDPE proportions for the top and bottom 10 countries by total volunteer count, contrasting both polyethylene types side by side. Among the top 10 volunteer countries, most show a gap between HDPE (blue) and LDPE (orange), with LDPE consistently exceeding HDPE, most prominently in Nigeria and Indonesia. Conversely, the bottom 10 volunteer countries show both proportions clustered near zero, suggesting that low volunteer participation may be associated with lower reported polyethylene collection of either type.
+Figure 2 compares HDPE and LDPE proportions for the top and bottom 10 countries by total volunteer count, placing both polyethylene types side by side. In the top 10 volunteer countries with visible polyethylene proportions, LDPE generally makes up a larger share than HDPE, especially in Nigeria and Indonesia; Kenya is the main exception, where HDPE is higher than LDPE. In contrast, the bottom 10 countries with visible differences more often show HDPE exceeding LDPE, such as in Singapore and El Salvador, while Korea and Kuwait show the opposite pattern. Several countries in both panels have little to no visible polyethylene proportion. Overall, Figure 2 suggests that volunteer count may be associated with different polyethylene composition patterns, but the relationship is inconsistent and country-specific factors still appear important.
 
 ### Does a Country's Environment Shape What Plastic Gets Collected?
 
@@ -694,7 +694,7 @@ plastic_ecology_summary_table |>
   cols_hide(forest_coverage_level)
 ```
 
-Table 6 shows the five least forested countries within each forest coverage level. Among countries in the low forest-coverage group, PET dominates as the leading plastic for four out of five entries, with Maldives and Tunisia both reporting 100% PET. South Africa is the only exception, where 99.4% of plastic collected falls under the unclassified Other category. As forest coverage level increases into the medium range, the leading plastic shifts away from PET, where Rwanda, China, India, and the Philippines all report Other as their leading type, with India showing a particularly high LDPE proportion at 32.0%. In the high forest-coverage group, we see Cameroon reporting LDPE as its leading plastic at 39.8%, with two countries reporting Other and PET as their leading plastic types. These results suggest that low forest coverage countries tend to be more heavily dominated by PET plastic, while higher coverage countries show more varied plastic composition, though country-specific reporting differences make direct comparisons difficult. The shift away from PET as forest coverage increases is one of the clearest patterns in the dataset.
+Table 6 shows the five least forested countries within each forest coverage level. Among countries in the low forest-coverage group, PET dominates as the leading plastic for four out of five entries, with Maldives and Tunisia both reporting 100% PET. South Africa is the only exception, where 99.4% of plastic collected falls under the unclassified Other category. As forest coverage level increases into the medium range, the leading plastic shifts away from PET, where Rwanda, China, India, and the Philippines all report Other as their leading type, with Burkina Faso showing a particularly high LDPE proportion at 35.9%. In the high forest-coverage group, we see Cameroon reporting LDPE as its leading plastic at 39.8%, with two countries reporting Other and PET as their leading plastic types. These results suggest that low forest coverage countries tend to be more heavily dominated by PET plastic, while higher coverage countries show more varied plastic composition, though country-specific reporting differences make direct comparisons difficult. The shift away from PET as forest coverage increases is one of the clearest patterns in the dataset.
 
 
 ```{r}
@@ -856,7 +856,7 @@ ggplot(plot_data,
   theme(plot.title = element_text(face = "bold", size = 14))
 ```
 
-Figure 3 plots each country's forested area against its threatened species count, with points colored by leading plastic type. The most noticeable pattern is the clustering of PET-dominated countries in the lower left region of the plot, corresponding to low forest coverage and fewer threatened species (seen in Table 7). As we move toward higher forest coverage and more threatened species, the leading plastic shifts away from PET. Japan and Cameroon stand out in this region with PP and LDPE as their leading plastics respectively. United Kingdom appears to be an outlier, showing PS as its leading plastic despite relatively low forest coverage. Figure 3 visually reinforces the findings from Tables 6 and 7, illustrating that PET dominance is associated with lower forest coverage and fewer threatened species in this dataset.
+The pattern in Table 7 becomes clearer when the environmental variables are viewed together. Figure 3 shows each country’s forested area and threatened-species count, with points colored by leading plastic type. The most noticeable pattern is the clustering of PET-dominated countries in the lower left region of the plot, corresponding to low forest coverage and fewer threatened species. As we move toward higher forest coverage and more threatened species, the leading plastic shifts away from PET. Japan and Cameroon stand out in this region with PP and LDPE as their leading plastics respectively. United Kingdom appears to be an outlier, showing PS as its leading plastic despite relatively low forest coverage. Figure 3 visually reinforces the findings from Tables 6 and 7, illustrating that PET dominance is associated with lower forest coverage and fewer threatened species in this dataset.
 
 ```{r}
 #| message: false
@@ -904,11 +904,11 @@ population_plastics |>
   )
 ```
 
-Figure 4 shows the distribution of threatened-species counts across the three most commonly collected plastic types: PET, LDPE, and PP, where each country is weighted by how much of that plastic it collected. The PET ridge is centered around 100–500 threatened species, suggesting that PET is more concentrated in countries with lower threatened-species counts. The LDPE ridge shows a similar distribution but is slightly broader, indicating more variability. Finally, the PP ridge shifts furthest to the right, peaking around 1,000 threatened species, suggesting that PP is more common in countries with higher threatened-species counts. This pattern is consistent with Table 7 and Figure 3, further supporting the idea that plastic type composition is associated with threatened-species count.
+To look beyond each country’s single leading plastic type, we next focused on the three plastic types with the highest total counts in the audit data: PET, LDPE, and PP. For context, PET is commonly used in drink bottles and food packaging, while PP is used in items such as caps, containers, wrappers, and tubs. Figure 4 shows the distribution of threatened-species counts across these three plastic types, where each country is weighted by how much of that plastic it collected. The PET ridge is centered around 100–500 threatened species, suggesting that PET is more concentrated in countries with lower threatened-species counts. The LDPE ridge shows a similar distribution but is slightly broader, indicating more variability. Finally, the PP ridge shifts furthest to the right, peaking around 1,000 threatened species, suggesting that PP is more common in countries with higher threatened-species counts. This pattern is consistent with Table 7 and Figure 3, further supporting the idea that plastic type composition is associated with threatened-species count.
 
 ### Are Country-Level Environmental Indicators Associated With What Plastic Gets Collected?
 
-To examine this pattern more formally, we built a linear model predicting PET proportion from forest coverage and threatened-species count. We also included GDP per capita and volunteer count to compare environmental predictors with economic and participation factors. The ANOVA table below breaks down how much of the variation in PET proportion each predictor explains.
+To examine this pattern more formally, we modeled PET proportion as the outcome variable because PET showed the clearest decline across the environmental summaries and contrasted strongly with PP in Figure 4. We built a linear model predicting PET proportion from forest coverage and threatened-species count. We also included GDP per capita and volunteer count to compare environmental predictors with economic and participation-related factors. The ANOVA table below breaks down how much of the variation in PET proportion each predictor explains.
 ```{r}
 pet_model <- population_plastics |>
   filter(parent_company == "Grand Total",
@@ -922,11 +922,19 @@ pet_model <- population_plastics |>
                 log(threatened_species) + 
                 log(gdp_per_capita) +
                 volunteers, data = _)
-
-anova(pet_model) |>
+  
+anova_terms <- anova(pet_model) |>
   tidy() |>
   mutate(
-    pct_variance = sumsq / sum(sumsq) * 100,
+    pct_variance = sumsq / sum(sumsq) * 100
+  )
+
+coef_terms <- tidy(pet_model) |>
+  select(term, estimate)
+
+anova_terms |>
+  left_join(coef_terms, by = "term") |>
+  mutate(
     term = recode(term,
       "volunteers" = "Volunteers",
       "forested_area" = "Forested Area",
@@ -934,7 +942,7 @@ anova(pet_model) |>
       "log(gdp_per_capita)" = "GDP Per Capita (log)",
       "Residuals" = "Unexplained")
   ) |>
-  select(term, df, sumsq, pct_variance, statistic, p.value) |>
+  select(term, estimate, df, sumsq, pct_variance, statistic, p.value) |>
   gt() |>
   tab_caption("Table 8: ANOVA results predicting PET plastic proportion from environmental, economic, and volunteer predictors") |>
   tab_header(
@@ -943,12 +951,14 @@ anova(pet_model) |>
   ) |>
   cols_label(
     term         = "Source",
+    estimate     = "Estimate",
     df           = "df",
     sumsq        = "Sum of Squares",
     pct_variance = "% of Variance",
     statistic    = "F",
     p.value      = "p-value"
   ) |>
+  fmt_number(columns = estimate, decimals = 4) |>
   fmt_number(columns = c(sumsq, statistic), decimals = 3) |>
   fmt_number(columns = pct_variance, decimals = 1) |>
   fmt_number(columns = p.value, decimals = 4) |>
@@ -967,7 +977,7 @@ anova(pet_model) |>
     heading.background.color = "#2C3E50"
   ) |>
   tab_source_note(
-    "Note: PET is modeled as it showed the strongest relationship with forest coverage and threatened species."
+    "Note: Estimates show the direction and size of each predictor's association with PET proportion, while the ANOVA columns show how much variation each predictor explains."
   ) |>
   tab_source_note(
     paste0("Model R² = ", round(summary(pet_model)$r.squared, 3),
@@ -975,7 +985,7 @@ anova(pet_model) |>
   )
 ```
 
-We found that the number of threatened species explains 12.5% of the variation in PET proportion (F = 5.841, p = 0.0209). The coefficient of -0.1325 indicates that, in this model, higher threatened-species count is associated with lower PET proportion. This aligns with what we saw in Figure 3 that countries with fewer threatened species tended to be more PET-dominated. Forested area pointed in the same direction (coefficient = -0.0042, p = 0.0794), though its p-value was not below the 0.05 threshold for statistical significance. Together, the model explains about 23% of the variation in PET proportion, leaving most of the variance unexplained by these predictors. Country-level environmental indicators appear to be meaningful signals of what plastic shows up in audit data, even after accounting for GDP per capita and volunteer participation.
+We found that the number of threatened species explains 12.5% of the variation in PET proportion (F = 5.841, p = 0.0209). The estimate of -0.1325 indicates that, in this model, higher threatened-species count is associated with lower PET proportion. This aligns with what we saw in Figure 3 that countries with fewer threatened species tended to be more PET-dominated. Forested area pointed in the same direction (estimate = -0.0042, p = 0.0794), though its p-value was not below the 0.05 threshold for statistical significance. Together, the model explains about 23% of the variation in PET proportion, leaving most of the variance unexplained by these predictors. Country-level environmental indicators appear to be meaningful signals of what plastic shows up in audit data, even after accounting for GDP per capita and volunteer participation.
 
 ### What the Audits Tell Us
 
