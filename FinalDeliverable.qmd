@@ -222,7 +222,7 @@ summarize_plastic_volunteer("hdpe", "United States of America") |>
   )
 ```
 
-Table 1 shows HDPE and volunteer statistics for the United States. The USA averaged 625.5 volunteers across 2019 and 2020, with only 9.21% of plastic collected being HDPE, and a mean of 0.7 HDPE pieces per parent company. To see whether this proportion was low compared to other polyethylene types, we next looked at its LDPE.
+Table 1 shows HDPE and volunteer statistics for the United States. The USA averaged 625.5 volunteers across 2019 and 2020, with only 9.21% of plastic collected being HDPE, and a mean of 0.7 HDPE pieces per parent company. To see whether this proportion was low compared to other polyethylene types, we next looked at LDPE in the same country.
 
 ```{r}
 #| label: ldpe for USA
